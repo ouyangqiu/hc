@@ -14,13 +14,29 @@
     <button onclick="checkKey()">立即提取</button>
     <div id="result" style="margin-top: 20px"></div>
 
-    <script>
-        async function checkKey() {
-            const key = document.getElementById('keyInput').value
-            const response = await fetch(`https://snowy-sound-1698/?key=${encodeURIComponent(key)}`)
-            const resultDiv = document.getElementById('result')
-            resultDiv.innerHTML = await response.text()
-        }
-    </script>
+<script>
+// 新版带加载状态的交互
+async function checkKey() {
+    const btn = document.querySelector('button')
+    btn.disabled = true
+    btn.textContent = '验证中...'
+    
+    try {
+        const resp = await fetch(`https://https://snowy-sound-1698.3614449655.workers.dev/?key=${encodeURIComponent(key)}`)
+        const data = await resp.text()
+        
+        // 处理响应
+        resultDiv.innerHTML = data === 'INVALID_KEY' ? 
+            '❌ 卡密无效' : 
+            `✅ 验证成功！<br>${data}`
+            
+    } catch (error) {
+        resultDiv.innerHTML = '⚠️ 网络连接失败'
+    } finally {
+        btn.disabled = false
+        btn.textContent = '立即提取'
+    }
+}
+</script>
 </body>
 </html>
