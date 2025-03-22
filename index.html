@@ -1,42 +1,104 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>小鱼儿CSGO卡网密钥替换缓存</title>
+    <title>全自定义卡密系统</title>
     <style>
-        body { max-width: 600px; margin: 2rem auto; padding: 20px }
-        input { padding: 12px; width: 300px; font-size: 16px }
-        button { padding: 12px 24px; background: #007bff; color: white; border: none }
+        /* 核心样式 */
+        :root { font-family: system-ui; }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+        #keyInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        #submitBtn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        #submitBtn:disabled { opacity: 0.6; }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            white-space: pre-wrap; /* 保留换行符 */
+        }
     </style>
 </head>
 <body>
-    <h2>小鱼儿CSGO卡网密钥替换缓存</h2>
-    <input type="text" id="keyInput" placeholder="输入您的卡密">
-    <button onclick="checkKey()">立即提取</button>
-    <div id="result" style="margin-top: 20px"></div>
+    <div class="container">
+        <h1>🔑 全自定义卡密提取系统</h1>
+        <input type="text" id="keyInput" placeholder="输入任意格式的卡密（支持中文/符号/任意长度）">
+        <button id="submitBtn">立即验证</button>
+        <div id="result"></div>
+    </div>
 
-<script>
-// 新版带加载状态的交互
-async function checkKey() {
-    const btn = document.querySelector('button')
-    btn.disabled = true
-    btn.textContent = '验证中...'
-    
-    try {
-        const resp = await fetch(`https://https://snowy-sound-1698.3614449655.workers.dev/?key=${encodeURIComponent(key)}`)
-        const data = await resp.text()
-        
-        // 处理响应
-        resultDiv.innerHTML = data === 'INVALID_KEY' ? 
-            '❌ 卡密无效' : 
-            `✅ 验证成功！<br>${data}`
+    <script>
+        // [!] 需修改：替换为你的Worker域名
+        const WORKER_URL = 'https://your-worker.workers.dev'
+
+        // 元素引用
+        const keyInput = document.getElementById('keyInput')
+        const submitBtn = document.getElementById('submitBtn')
+        const resultDiv = document.getElementById('result')
+
+        // 提交处理
+        async function handleSubmit() {
+            const key = keyInput.value.trim()
             
-    } catch (error) {
-        resultDiv.innerHTML = '⚠️ 网络连接失败'
-    } finally {
-        btn.disabled = false
-        btn.textContent = '立即提取'
-    }
-}
-</script>
+            // 空值检查
+            if (!key) {
+                showResult('⚠️ 请输入卡密', 'warning')
+                return
+            }
+
+            submitBtn.disabled = true
+            submitBtn.textContent = '验证中...'
+
+            try {
+                // 使用encodeURIComponent处理特殊字符
+                const response = await fetch(`${WORKER_URL}?key=${encodeURIComponent(key)}`)
+                const data = await response.text()
+                
+                if (data.startsWith('SUCCESS:')) {
+                    showResult(data.replace('SUCCESS:', '✅ 验证成功！\n\n'), 'success')
+                } else {
+                    showResult(`❌ ${data}`, 'error')
+                }
+            } catch (error) {
+                showResult('⚠️ 网络连接失败，请检查网络', 'error')
+            } finally {
+                submitBtn.disabled = false
+                submitBtn.textContent = '立即验证'
+            }
+        }
+
+        // 结果显示
+        function showResult(content, type) {
+            resultDiv.innerHTML = content
+            resultDiv.className = type
+            resultDiv.style.display = 'block'
+        }
+
+        // 事件绑定
+        submitBtn.addEventListener('click', handleSubmit)
+        keyInput.addEventListener('keypress', e => e.key === 'Enter' && handleSubmit())
+    </script>
 </body>
 </html>
